@@ -1,25 +1,45 @@
-const http = require('http');
+const express = require("express");
+const fs = require("fs");
+
+const app = express();
 
 const port = 5000;
 
-const server = http.createServer((req, res) => {
-	const url = req.url;
+app.get('/', (req, res) => {
+	res.send('Greeting from server');
+});
 
-	if (url === '/') {
-		res.statusCode = 200;
-		res.setHeader('Content-type', 'text-html');
-		res.write('<h1>Greeting from server!</h1>');
-		res.end();
-	}
+app.get('/data', (req, res) => {
+	res.send('Here is some data');
+});
 
-	if (url ==='/data') {
-		res.statusCode = 200;
-		res.setHeader('Content-type', 'text-html');
-		res.write('<p>Welcome to data path</p>');
-		res.end();
-	}
+app.listen(port, () => {
+	console.log(`Server is listening on port ${port}`);
 })
 
-server.listen(port, () => {
-	console.log(`Server is listening on port ${port}`)
-})
+let text = '';
+for (let i = 1; i <= 10; i++) {
+	text += i + '\n';
+}
+
+fs.writeFile('./text/file.txt', text, err => {
+	if (err) throw err;
+	console.log('File successfully written');
+});
+
+fs.readFile('./text/file.txt', 'utf-8', (err, data) => {
+	if (err) throw err;
+
+	const arr = data.split('\n');
+	let randomText = arr[Math.floor(Math.random()*(arr.length - 1))];
+
+	fs.appendFile('./text/file.txt', randomText, err => {
+		if (err) throw err;
+	});
+
+	console.log('Random text:', randomText)
+
+	fs.unlink('./text/file.txt', err => {
+		if (err) throw err;
+	});
+});
