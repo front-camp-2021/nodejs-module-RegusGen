@@ -1,45 +1,73 @@
 const express = require("express");
 const fs = require("fs");
+const bodyParser = require("body-parser")
 
 const app = express();
 
 const port = 5000;
 
-app.get('/', (req, res) => {
-	res.send('Greeting from server');
+let products = [];
+
+fs.readFile('./db/products.json', 'utf-8', (err, data) => {
+	if (err) throw err;
+	products = JSON.parse(data);
 });
 
-app.get('/data', (req, res) => {
-	res.send('Here is some data');
+const writeToFile = (list, res) => {
+	fs.writeFile('./db/products.json', JSON.stringify(list), err => {
+		if (err) throw err;
+		res.send(list);
+	});
+};
+
+app.use(bodyParser.urlencoded({extended: false}));
+
+app.use(bodyParser.json());
+
+app.get('/products', (req, res) => {
+	res.send(products);
+});
+
+app.get('/products/:id', (req, res) => {
+	const { id } = req.params;
+
+	const product = products.filter((product) => product.id === id);
+
+	res.send(product);
+});
+
+app.post('/products', (req, res) => {
+	const { product } = req.body;
+
+	products.push(product);
+
+	writeToFile(products, res);
+});
+
+app.put('/products/:id', (req, res) => {
+	const { id } = req.params;
+	const { product } = req.body;
+
+	products = products.map((existingProduct) => (
+		existingProduct.id === id ? product : existingProduct
+	));
+	writeToFile(products, res);
+});
+
+app.delete('/products/:id', (req, res) => {
+	const { id } = req.params;
+
+	products = products.filter((product) => product.id !== id);
+
+	writeToFile(products, res);
+});
+
+app.delete('/products', (req, res) => {
+	products = [];
+
+	writeToFile(products, res);
 });
 
 app.listen(port, () => {
 	console.log(`Server is listening on port ${port}`);
-})
-
-let text = '';
-for (let i = 1; i <= 10; i++) {
-	text += i + '\n';
-}
-
-fs.writeFile('./text/file.txt', text, err => {
-	if (err) throw err;
-	console.log('File successfully written');
-});
-
-fs.readFile('./text/file.txt', 'utf-8', (err, data) => {
-	if (err) throw err;
-
-	const arr = data.split('\n');
-	let randomText = arr[Math.floor(Math.random()*(arr.length - 1))];
-
-	fs.appendFile('./text/file.txt', randomText, err => {
-		if (err) throw err;
-	});
-
-	console.log('Random text:', randomText)
-
-	fs.unlink('./text/file.txt', err => {
-		if (err) throw err;
-	});
 });
