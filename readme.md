@@ -19,3 +19,13 @@ Task 3:
 2. Create a new folder inside your project with a file of JSON type, where you will store all your items.
 3. Inside your file with a server you should create CRUD operations to control your items as we showed you with users.
 4. Use 'fs' module to read, write into ur items json.
+
+
+Task 4:
+
+Implement pagination API.
+Implement search API.
+Implement "favorite product" CRUD. (don't forgot to write changes to your JSON on file system)
+Refactor code and add routes.
+Refactor code and controller.
+Refactor code and add any custom middleware. (e.g. log in console requested URL )
